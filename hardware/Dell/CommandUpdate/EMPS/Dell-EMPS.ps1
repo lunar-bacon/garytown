@@ -343,13 +343,20 @@ Function Install-DCU {
                 #Build Required Info to Download and Update CM Package
                 $TargetFilePathName = "$($DellCabExtractPath)\$($TargetFileName)"
                 #Invoke-WebRequest -Uri $TargetLink -OutFile $TargetFilePathName -UseBasicParsing -Verbose
+
+                Write-Output "Using WebRequest to download the file"
+                Invoke-WebRequest -Uri $TargetLink -OutFile $TargetFilePathName -UseBasicParsing -Verbose
+
+                <# Removing all references to BITS, as it causes issue with Cortex XDR, even while commented.
                 if ($UseWebRequest){
                     Write-Output "Using WebRequest to download the file"
                     Invoke-WebRequest -Uri $TargetLink -OutFile $TargetFilePathName -UseBasicParsing -Verbose
                 }
                 else{
-                    Start-BitsTransfer -Source $TargetLink -Destination $TargetFilePathName -DisplayName $TargetFileName -Description "Downloading Dell Command Update" -Priority Low -ErrorVariable err -ErrorAction SilentlyContinue
+                    Start-XXXXTransfer -Source $TargetLink -Destination $TargetFilePathName -DisplayName $TargetFileName -Description "Downloading Dell Command Update" -Priority Low -ErrorVariable err -ErrorAction SilentlyContinue
                 }
+                #>
+                
                 if (!(Test-Path $TargetFilePathName)){
                     Invoke-WebRequest -Uri $TargetLink -OutFile $TargetFilePathName -UseBasicParsing -Verbose
                 }
@@ -413,14 +420,20 @@ Function Get-DCUAppUpdates {
                 $TargetFileName = ($CommandUpdateAppsLatest.path).Split("/") | Select-Object -Last 1
                 $TargetLink = $CommandUpdateAppsLatest.path
                 $TargetFilePathName = "$($DellCabDownloadsPath)\$($TargetFileName)"
+
+                Write-Output "Using WebRequest to download the file"
+                Invoke-WebRequest -Uri $TargetLink -OutFile $TargetFilePathName -UseBasicParsing -Verbose
+
+                <# Removing all references to BITS, as even mentioning it in the script causes Cortex XDR to say no.
                 if ($UseWebRequest){
                     Write-Output "Using WebRequest to download the file"
                     Invoke-WebRequest -Uri $TargetLink -OutFile $TargetFilePathName -UseBasicParsing -Verbose
                 }
                 else{
                     Write-Output "Using BITS to download the file"
-                    Start-BitsTransfer -Source $TargetLink -Destination $TargetFilePathName -DisplayName $TargetFileName -Description "Downloading Dell Command Update" -ErrorAction SilentlyContinue
+                    Start-XXXXTransfer -Source $TargetLink -Destination $TargetFilePathName -DisplayName $TargetFileName -Description "Downloading Dell Command Update" -ErrorAction SilentlyContinue
                 }
+                #>
                 
                 if (!(Test-Path $TargetFilePathName)){
                     Invoke-WebRequest -Uri $TargetLink -OutFile $TargetFilePathName -UseBasicParsing -Verbose
@@ -738,6 +751,7 @@ function Invoke-DCU {
     }
 }
 
+<# We don't need this anymore. Thanks, Cortex.
 function Invoke-DCUBITS {
     [CmdletBinding()]
     
@@ -808,7 +822,7 @@ function Invoke-DCUBITS {
                 $URL = "$DellDLRootURL/$($Update.file)"
                 $Description = "$($Update.version) from $($update.date) | Type: $($Update.type) | Category: $($update.category) | Severity: $($Update.urgency)"
                 Write-Host "Downloading $URL"
-                Start-BitsTransfer -DisplayName $Update.name -Source $URL -Destination $DownloadPath -Description $Description  -RetryInterval 60 -CustomHeaders "User-Agent:Bob"
+                Start-XXXXTransfer -DisplayName $Update.name -Source $URL -Destination $DownloadPath -Description $Description  -RetryInterval 60 -CustomHeaders "User-Agent:Bob"
             }
             Write-Host "============================================================================" -ForegroundColor Cyan
             Write-Host "Starting Installation of Updates" -ForegroundColor Cyan
@@ -833,6 +847,9 @@ function Invoke-DCUBITS {
         return
     }
 }
+#>
+
+<# Removing. Not required. And BITS.
 #Note New-DCUOfflineCatalog, I have not tested or confirmed this is working, this is just a concept that I'm trying out ane HOPING it works.
 function New-DCUOfflineCatalog {
     [CmdletBinding()]
@@ -875,10 +892,12 @@ function New-DCUOfflineCatalog {
             Write-Host "   File Already Exists, Continuing to next Update.." -ForegroundColor Green
         }
         else {
-            Start-BitsTransfer -DisplayName $UpdateFileName -Source $UpdateFileURL -Destination $UpdateFileLocalPath -Description "Downloading $UpdateFileURL" -RetryInterval 60 #-CustomHeaders "User-Agent:Bob" 
+            Start-XXXXTransfer -DisplayName $UpdateFileName -Source $UpdateFileURL -Destination $UpdateFileLocalPath -Description "Downloading $UpdateFileURL" -RetryInterval 60 #-CustomHeaders "User-Agent:Bob" 
         }
     }
 }
+#>
+
 #Note New-DCUCatalogFile, I have not tested or confirmed this is working, this is just a concept that I'm trying out ane HOPING it works.
 function New-DCUCatalogFile {
     [CmdletBinding()]
@@ -1176,7 +1195,13 @@ Function Get-DellBIOSUpdates {
         $UpdatePath = $Update.Path
         $UpdateFileName = $UpdatePath -split "/" | Select-Object -Last 1
         $UpdateLocalPath = "$env:windir\temp\$UpdateFileName"
-        Start-BitsTransfer -DisplayName $UpdateFileName -Source $UpdatePath -Destination $UpdateLocalPath -Description "Downloading $UpdateFileName" -RetryInterval 60 #-CustomHeaders "User-Agent:Bob" 
+
+        # Removing because BITS.
+        #Start-XXXXTransfer -DisplayName $UpdateFileName -Source $UpdatePath -Destination $UpdateLocalPath -Description "Downloading $UpdateFileName" -RetryInterval 60 #-CustomHeaders "User-Agent:Bob" 
+
+        # This is the WebRequest alternative.
+        Invoke-WebRequest -Uri $DCWarrURL -OutFile $DCWarrPath -Verbose -UseBasicParsing -Headers @{"User-Agent"="BITS 42"}
+        
         if (Test-Path -Path $UpdateLocalPath){
             Write-Host "Installing $UpdateFileName, logfile: $($UpdateLocalPath).log"
             if ($Password){
@@ -1207,7 +1232,19 @@ Function Get-DellBIOSUpdates {
         $UpdatePath = $Update.Path
         $UpdateFileName = $UpdatePath -split "/" | Select-Object -Last 1
         $UpdateLocalPath = "$DownloadPath\$UpdateFileName"
-        Start-BitsTransfer -DisplayName $UpdateFileName -Source $UpdatePath -Destination $UpdateLocalPath -Description "Downloading $UpdateFileName" -RetryInterval 60 #-CustomHeaders "User-Agent:Bob"
+        # Removing, once again, because of BITS.
+        #Start-XXXXTransfer -DisplayName $UpdateFileName -Source $UpdatePath -Destination $UpdateLocalPath -Description "Downloading $UpdateFileName" -RetryInterval 60 #-CustomHeaders "User-Agent:Bob"
+        # I like to count my failures, ya know?
+        $Count = 1
+        if (!(Test-Path -Path $UpdateLocalPath)) {
+            if ($Count -gt 1) {
+                Write-Host "Attempt: $Count"
+                Write-Host "Download failed. Retrying in 60 seconds..." -ForegroundColor Red
+                Start-Sleep -Seconds 60
+            }
+            Invoke-WebRequest -Uri $UpdatePath -OutFile $UpdateLocalPath -UseBasicParsing -Verbose
+            $Count++
+        }
         return $UpdateLocalPath
     }
     if ($Latest){
@@ -1219,6 +1256,7 @@ Function Get-DellBIOSUpdates {
     return $Updates |Select-Object -Property "PackageID","Name","ReleaseDate","DellVersion" | Sort-Object -Property ReleaseDate -Descending
 }
 
+<# This does not work. Thank you Dell, very cool.
 Function Invoke-DellIntuneAppPublishScript {
 
     write-host Write-Host -ForegroundColor Green "[+] Function: Invoke-PublishDellIntuneApp"
@@ -1238,6 +1276,7 @@ Function Invoke-DellIntuneAppPublishScript {
         iex (irm https://raw.githubusercontent.com/dell/Endpoint-Management-Script-Library/refs/heads/main/Intune%20Scripts/EnterpriseAppDeployment/Dell_Intune_App_Publish_1.0.ps1 -help)
     }
 }
+#>
 
 <# Placeholders for future functions
 
