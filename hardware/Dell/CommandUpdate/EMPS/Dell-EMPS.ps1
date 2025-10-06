@@ -1200,7 +1200,7 @@ Function Get-DellBIOSUpdates {
         #Start-XXXXTransfer -DisplayName $UpdateFileName -Source $UpdatePath -Destination $UpdateLocalPath -Description "Downloading $UpdateFileName" -RetryInterval 60 #-CustomHeaders "User-Agent:Bob" 
 
         # This is the WebRequest alternative.
-        Invoke-WebRequest -Uri $DCWarrURL -OutFile $DCWarrPath -Verbose -UseBasicParsing -Headers @{"User-Agent"="BITS 42"}
+        Invoke-WebRequest -Uri $UpdatePath -OutFile $UpdateLocalPath -Verbose -UseBasicParsing -Headers @{"User-Agent"="BITS 42"}
         
         if (Test-Path -Path $UpdateLocalPath){
             Write-Host "Installing $UpdateFileName, logfile: $($UpdateLocalPath).log"
@@ -1234,17 +1234,7 @@ Function Get-DellBIOSUpdates {
         $UpdateLocalPath = "$DownloadPath\$UpdateFileName"
         # Removing, once again, because of BITS.
         #Start-XXXXTransfer -DisplayName $UpdateFileName -Source $UpdatePath -Destination $UpdateLocalPath -Description "Downloading $UpdateFileName" -RetryInterval 60 #-CustomHeaders "User-Agent:Bob"
-        # I like to count my failures, ya know?
-        $Count = 1
-        if (!(Test-Path -Path $UpdateLocalPath)) {
-            if ($Count -gt 1) {
-                Write-Host "Attempt: $Count"
-                Write-Host "Download failed. Retrying in 60 seconds..." -ForegroundColor Red
-                Start-Sleep -Seconds 60
-            }
-            Invoke-WebRequest -Uri $UpdatePath -OutFile $UpdateLocalPath -UseBasicParsing -Verbose
-            $Count++
-        }
+        Invoke-WebRequest -Uri $UpdatePath -OutFile $UpdateLocalPath -UseBasicParsing -Verbose
         return $UpdateLocalPath
     }
     if ($Latest){
