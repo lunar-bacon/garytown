@@ -88,7 +88,9 @@ function Get-DellWarrantyInfo {
             $EXEName = $DCWarrURL.Split("/")[-1]
             $DCWarrPath = "$ScratchDir\$EXEName"
             Write-Verbose -Message "Downloading Dell Command Integration Suite"
-            Start-BitsTransfer -Source $DCWarrURL -Destination $DCWarrPath -CustomHeaders "User-Agent:BITS 42"
+            # Removing reference to BITS to save Cortex from the terror.
+            #Start-XXXXTransfer -Source $DCWarrURL -Destination $DCWarrPath -CustomHeaders "User-Agent:BITS 42"
+            Invoke-WebRequest -Uri $DCWarrURL -OutFile $DCWarrPath -Verbose -UseBasicParsing -Headers @{"User-Agent"="BITS 42"}
             Write-Verbose -Message "Installing Dell Command Integration Suite"
             write-verbose -Message "Start-Process -FilePath $DCWarrPath -ArgumentList `"/S /E=$ScratchDir`" -Wait -NoNewWindow"
             Start-Process -FilePath $DCWarrPath -ArgumentList "/S /E=$ScratchDir" -Wait -NoNewWindow
