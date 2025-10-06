@@ -1,17 +1,14 @@
 $ScriptName = 'dell.garytown.com'
 $ScriptVersion = '25.4.30.13.12'
 
-#region Initialize
-
 $ComputerSystem = (Get-CimInstance -ClassName Win32_ComputerSystem)
 $Manufacturer = ($ComputerSystem).Manufacturer
 $Model = ($ComputerSystem).Model
 $SystemSKUNumber = ($ComputerSystem).SystemSKUNumber
 $SerialNumber = Get-CimInstance -ClassName Win32_BIOS | Select-Object -ExpandProperty SerialNumber
 
-
 Invoke-Expression (Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/lunar-bacon/garytown/refs/heads/master/hardware/Dell/CommandUpdate/EMPS/Dell-EMPS.ps1')
-Invoke-Expression (Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/gwblok/garytown/refs/heads/master/hardware/Dell/CommandUpdate/EMPS/Dell-EMPSWarranty.ps1')
+Invoke-Expression (Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/lunar-bacon/garytown/refs/heads/master/hardware/Dell/CommandUpdate/EMPS/Dell-EMPSWarranty.ps1')
 
 Write-Host -ForegroundColor Cyan "Manufacturer:       " -NoNewline ; Write-Host  -ForegroundColor Yellow "$Manufacturer"
 Write-Host -ForegroundColor Cyan "Model:              " -NoNewline ; Write-Host  -ForegroundColor Yellow "$Model"
@@ -35,4 +32,3 @@ Write-Host -ForegroundColor Green "[+] Function: Get-DCUUpdateList"
 Write-Host -ForegroundColor Green "[+] Function: Get-DellBIOSUpdates"
 Write-Host -ForegroundColor Green "[+] Function: Get-DellWarrantyInfo (-Cleanup)" #Temporarily Installs Dell Command Integration Suite to gather warranty info
 #Write-Host -ForegroundColor Green "[+] Function: Invoke-DellIntuneAppPublishScript" #Not yet implemented
-
