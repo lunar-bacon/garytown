@@ -10,7 +10,7 @@ $SystemSKUNumber = ($ComputerSystem).SystemSKUNumber
 $SerialNumber = Get-CimInstance -ClassName Win32_BIOS | Select-Object -ExpandProperty SerialNumber
 
 
-Invoke-Expression (Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/gwblok/garytown/refs/heads/master/hardware/Dell/CommandUpdate/EMPS/Dell-EMPS.ps1')
+Invoke-Expression (Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/lunar-bacon/garytown/refs/heads/master/hardware/Dell/CommandUpdate/EMPS/Dell-EMPS.ps1')
 Invoke-Expression (Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/gwblok/garytown/refs/heads/master/hardware/Dell/CommandUpdate/EMPS/Dell-EMPSWarranty.ps1')
 
 Write-Host -ForegroundColor Green "[+] Function Invoke-MMSDemo2025"
